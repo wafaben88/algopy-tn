@@ -40,6 +40,13 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="fr" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var p=location.pathname;if(p==='/'||p==='/index.html')return;if(p.endsWith('/index.html')){history.replaceState(null,'',p.slice(0,-10));return;}var t=p.endsWith('/')?p+'index.html':p+'/index.html';location.replace(t+location.search+location.hash);})();`,
+          }}
+        />
+      </head>
       <body className="min-h-screen text-[var(--foreground)]">
         <Sidebar />
         <div className="md:pl-64">
