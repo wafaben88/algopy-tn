@@ -4,6 +4,7 @@ import { Heart, Flame, Zap } from "lucide-react";
 import { useEffect } from "react";
 import { useProgressStore } from "@/lib/store/useProgressStore";
 import { levelFromXp } from "@/lib/gamification/xp";
+import { useAuth } from "@/lib/auth/AuthContext";
 import Link from "next/link";
 
 export function Header() {
@@ -16,6 +17,7 @@ export function Header() {
     avatar,
     tickHearts,
   } = useProgressStore();
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     const t = setInterval(() => tickHearts(), 30000);
@@ -75,6 +77,29 @@ export function Header() {
               {username}
             </span>
           </Link>
+          {user?.role === "admin" ? (
+            <Link
+              href="/admin"
+              className="hidden md:inline-flex rounded-full border border-violet-400/40 bg-violet-500/10 px-3 py-1 text-xs font-medium text-violet-200 hover:bg-violet-500/20"
+            >
+              Admin
+            </Link>
+          ) : null}
+          {user ? (
+            <button
+              onClick={logout}
+              className="rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1 text-xs hover:bg-[var(--card-hover)]"
+            >
+              Déconnexion
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="rounded-full border border-violet-400/40 bg-violet-500/10 px-3 py-1 text-xs font-medium text-violet-200 hover:bg-violet-500/20"
+            >
+              Connexion
+            </Link>
+          )}
         </div>
       </div>
     </header>

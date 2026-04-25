@@ -4,6 +4,7 @@ import "./globals.css";
 import { Sidebar, MobileNav } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { ToastHost } from "@/components/gamification/ToastHost";
+import { AuthProvider } from "@/lib/auth/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -48,13 +49,15 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen text-[var(--foreground)]">
-        <Sidebar />
-        <div className="md:pl-64">
-          <Header />
-          <main className="px-4 pb-24 pt-6 md:px-8 md:pb-10">{children}</main>
-        </div>
-        <MobileNav />
-        <ToastHost />
+        <AuthProvider>
+          <Sidebar />
+          <div className="md:pl-64">
+            <Header />
+            <main className="px-4 pb-24 pt-6 md:px-8 md:pb-10">{children}</main>
+          </div>
+          <MobileNav />
+          <ToastHost />
+        </AuthProvider>
       </body>
     </html>
   );
