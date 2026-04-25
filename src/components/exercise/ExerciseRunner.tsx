@@ -25,17 +25,20 @@ interface Props {
 }
 
 export function ExerciseRunner({ exercise, onSolved, autoAward = true }: Props) {
+  // `key` on each inner runner forces React to remount when the exercise
+  // changes, so local UI state (`selected`, `status`, code, order, ...) is
+  // never carried over from a previously verified exercise.
   switch (exercise.type) {
     case "mcq":
-      return <McqRunner exercise={exercise} onSolved={onSolved} autoAward={autoAward} />;
+      return <McqRunner key={exercise.id} exercise={exercise} onSolved={onSolved} autoAward={autoAward} />;
     case "multi-mcq":
-      return <MultiMcqRunner exercise={exercise} onSolved={onSolved} autoAward={autoAward} />;
+      return <MultiMcqRunner key={exercise.id} exercise={exercise} onSolved={onSolved} autoAward={autoAward} />;
     case "fill":
-      return <FillRunner exercise={exercise} onSolved={onSolved} autoAward={autoAward} />;
+      return <FillRunner key={exercise.id} exercise={exercise} onSolved={onSolved} autoAward={autoAward} />;
     case "order":
-      return <OrderRunner exercise={exercise} onSolved={onSolved} autoAward={autoAward} />;
+      return <OrderRunner key={exercise.id} exercise={exercise} onSolved={onSolved} autoAward={autoAward} />;
     case "code":
-      return <CodeRunner exercise={exercise} onSolved={onSolved} autoAward={autoAward} />;
+      return <CodeRunner key={exercise.id} exercise={exercise} onSolved={onSolved} autoAward={autoAward} />;
     default:
       return null;
   }
