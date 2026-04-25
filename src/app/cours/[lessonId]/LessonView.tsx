@@ -17,13 +17,19 @@ interface Props {
 }
 
 export function LessonView({ lesson, chapter, level }: Props) {
-  const [phase, setPhase] = useState<"content" | "exercises" | "done">("content");
-  const [exIdx, setExIdx] = useState(0);
-  const [exDone, setExDone] = useState<Set<string>>(new Set());
-
   const completeLesson = useProgressStore((s) => s.completeLesson);
   const completed = useProgressStore((s) => s.completedLessons);
+  const completedExercises = useProgressStore((s) => s.completedExercises);
   const isCompleted = completed.includes(lesson.id);
+
+  const [phase, setPhase] = useState<"content" | "exercises" | "done">("content");
+  const [exIdx, setExIdx] = useState(0);
+  const [exDone, setExDone] = useState<Set<string>>(
+    () =>
+      new Set(
+        lesson.exercises.filter((e) => completedExercises.includes(e.id)).map((e) => e.id),
+      ),
+  );
 
   const allLessons = getAllLessons();
   const idx = allLessons.findIndex((l) => l.id === lesson.id);

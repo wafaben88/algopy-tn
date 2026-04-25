@@ -27,7 +27,9 @@ interface Props {
 export function ExerciseRunner({ exercise, onSolved, autoAward = true }: Props) {
   // `key` on each inner runner forces React to remount when the exercise
   // changes, so local UI state (`selected`, `status`, code, order, ...) is
-  // never carried over from a previously verified exercise.
+  // never carried over from a previously verified exercise. Each runner
+  // then derives its initial state from the store: if the exercise is
+  // already completed, it mounts in a "déjà gagné" review state.
   switch (exercise.type) {
     case "mcq":
       return <McqRunner key={exercise.id} exercise={exercise} onSolved={onSolved} autoAward={autoAward} />;
@@ -151,9 +153,13 @@ function McqRunner({
   onSolved?: (xp: number) => void;
   autoAward: boolean;
 }) {
-  const [selected, setSelected] = useState<number | null>(null);
-  const [status, setStatus] = useState<"idle" | "correct" | "wrong">("idle");
   const { done, award, wrong } = useAward(exercise, autoAward, onSolved);
+  const [selected, setSelected] = useState<number | null>(
+    done ? exercise.correctIndex : null,
+  );
+  const [status, setStatus] = useState<"idle" | "correct" | "wrong">(
+    done ? "correct" : "idle",
+  );
 
   const check = () => {
     if (selected === null) return;
@@ -245,9 +251,13 @@ function MultiMcqRunner({
   onSolved?: (xp: number) => void;
   autoAward: boolean;
 }) {
-  const [selected, setSelected] = useState<number[]>([]);
-  const [status, setStatus] = useState<"idle" | "correct" | "wrong">("idle");
   const { done, award, wrong } = useAward(exercise, autoAward, onSolved);
+  const [selected, setSelected] = useState<number[]>(
+    done ? [...exercise.correctIndices] : [],
+  );
+  const [status, setStatus] = useState<"idle" | "correct" | "wrong">(
+    done ? "correct" : "idle",
+  );
 
   const toggle = (i: number) => {
     if (status !== "idle") return;
@@ -333,9 +343,11 @@ function FillRunner({
   onSolved?: (xp: number) => void;
   autoAward: boolean;
 }) {
-  const [val, setVal] = useState("");
-  const [status, setStatus] = useState<"idle" | "correct" | "wrong">("idle");
   const { done, award, wrong } = useAward(exercise, autoAward, onSolved);
+  const [val, setVal] = useState(done ? exercise.answers[0] ?? "" : "");
+  const [status, setStatus] = useState<"idle" | "correct" | "wrong">(
+    done ? "correct" : "idle",
+  );
 
   const check = () => {
     const ok = exercise.answers.some(
@@ -406,11 +418,13 @@ function OrderRunner({
   onSolved?: (xp: number) => void;
   autoAward: boolean;
 }) {
-  const [order, setOrder] = useState<number[]>(() =>
-    exercise.items.map((_, i) => i),
-  );
-  const [status, setStatus] = useState<"idle" | "correct" | "wrong">("idle");
   const { done, award, wrong } = useAward(exercise, autoAward, onSolved);
+  const [order, setOrder] = useState<number[]>(() =>
+    done ? [...exercise.correctOrder] : exercise.items.map((_, i) => i),
+  );
+  const [status, setStatus] = useState<"idle" | "correct" | "wrong">(
+    done ? "correct" : "idle",
+  );
 
   const move = (idx: number, dir: -1 | 1) => {
     if (status !== "idle") return;
@@ -494,8 +508,15 @@ function CodeRunner({
   onSolved?: (xp: number) => void;
   autoAward: boolean;
 }) {
-  const [code, setCode] = useState(exercise.starter);
-  const [status, setStatus] = useState<"idle" | "correct" | "wrong">("idle");
+  const recordPythonRun = useProgressStore((s) => s.recordPythonRun);
+  const recordPerfectQuiz = useProgressStore((s) => s.recordPerfectQuiz);
+  const { done, award, wrong } = useAward(exercise, autoAward, onSolved);
+  const [code, setCode] = useState(
+    done ? exercise.solution : exercise.starter,
+  );
+  const [status, setStatus] = useState<"idle" | "correct" | "wrong">(
+    done ? "correct" : "idle",
+  );
   const [running, setRunning] = useState(false);
   const [pyLoading, setPyLoading] = useState(false);
   const [results, setResults] = useState<
@@ -504,9 +525,6 @@ function CodeRunner({
   const [stdout, setStdout] = useState("");
   const [stderr, setStderr] = useState("");
   const [hintIdx, setHintIdx] = useState(-1);
-  const recordPythonRun = useProgressStore((s) => s.recordPythonRun);
-  const recordPerfectQuiz = useProgressStore((s) => s.recordPerfectQuiz);
-  const { done, award, wrong } = useAward(exercise, autoAward, onSolved);
 
   const run = async () => {
     setRunning(true);
